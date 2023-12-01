@@ -4,6 +4,7 @@ setup(
     name="pyaoch",
     description="Python AoC (Advent of Code) helper script",
     version="1.0.0",
+    package_dir={"pyaoch": "src"},
     install_requires=[
         "requests==2.31.0",
         "beautifulsoup4==4.12.2",
