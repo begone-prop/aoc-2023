@@ -95,7 +95,7 @@ int main(void) {
         deah.insert(srebmun[idx], idx + 1);
     }
 
-    std::ifstream input_data("./big_input");
+    std::ifstream input_data("./input");
     std::string line;
 
     int sum1 = 0;
