@@ -64,7 +64,7 @@ def main():
         cookie = getenv("AOC_COOKIE")
 
     if not cookie:
-        print(f"No cookie provided either with -c or $AOC_COOKIE")
+        print(f"No cookie provided either with -c or $AOC_COOKIE", file=stderr)
         parser.print_usage(file=stderr)
         exit(1)
 
