@@ -36,7 +36,7 @@ int to_index(int x, int y) {
     return -1;
 }
 
-void neighbours(size_t x, size_t y, symbol *s, const arena *ar) {
+void neighbours(symbol *s, const arena *ar) {
     bool seen[8] = {0};
     size_t idx = 0;
 
@@ -44,8 +44,8 @@ void neighbours(size_t x, size_t y, symbol *s, const arena *ar) {
         for(int dx = -1; dx <= 1; dx++) {
             if(dy == 0 && dx == 0) continue;
 
-            int ny = (int)y + dy;
-            int nx = (int)x + dx;
+            int ny = (int)s->y + dy;
+            int nx = (int)s->x + dx;
 
             if(nx < 0 || (size_t)nx >= ar->width) continue;
             if(ny < 0 || (size_t)ny >= ar->height) continue;
@@ -67,7 +67,7 @@ void neighbours(size_t x, size_t y, symbol *s, const arena *ar) {
 
                 i = nx + ny * ar->width;
                 len = 0;
-                for(; i < ar->size && isdigit(ar->data[i]); i++, len++) {
+                for(; (size_t)i < ar->size && isdigit(ar->data[i]); i++, len++) {
                     if(!dy) continue;
                     int k = to_index(dx + len, dy);
                     if(k == -1) continue;
@@ -113,7 +113,7 @@ int main(void) {
             if(!IS_SYMBOL(c)) continue;
 
             symbol s = (symbol){.symb = c, .x = x, .y = y, .size = 0};
-            neighbours(x, y, &s, &ar);
+            neighbours(&s, &ar);
 
             for(size_t idx = 0; idx < s.size; idx++) {
                 sum1 += s.neigh[idx];
