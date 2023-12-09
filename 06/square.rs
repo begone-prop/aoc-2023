@@ -1,5 +1,7 @@
 use std::fs::read_to_string;
 
+// the answer is the count of whole numbers between the two roots of the
+// inverted parabola with equation d(t) = Tt - t^2 - D
 fn quad(t: f64, d: f64) -> i64 {
     ((t + (t * t - 4.0 * d).sqrt()) / 2.0).ceil() as i64
         - ((t - (t * t - 4.0 * d).sqrt()) / 2.0).floor() as i64
