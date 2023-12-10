@@ -34,7 +34,7 @@ fn main() {
         "Part 2: {:?}",
         numbers
             .iter()
-            .map(|n| next_term(&n.iter().rev().map(|e| *e).collect::<Vec<i64>>()))
+            .map(|n| next_term(&n.iter().rev().cloned().collect::<Vec<i64>>()))
             .sum::<i64>()
     );
 }
