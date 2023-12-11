@@ -1,3 +1,4 @@
+#include <exception>
 #include <iostream>
 #include <sys/stat.h>
 #include <sys/mman.h>
@@ -7,7 +8,6 @@
 #include <set>
 
 #define IS_PIPE(C) ((C) != '.')
-#define START 'S'
 
 enum Direction {
     DIR_UP = 0,
@@ -30,6 +30,7 @@ typedef struct Vec2 {
     Vec2 operator+(const Vec2 &v) const { return {x + v.x, y + v.y}; }
     Vec2 operator-(const Vec2 &v) const { return {x - v.x, y - v.y}; }
     bool operator<(const Vec2 &o) const {if(x < o.x) return true; if(x > o.x) return false; if(y < o.y) return true; if(y > o.y) return false; return false;}
+    long det(const Vec2 &v) const { return x * v.y - v.x * y; }
 } Vec2;
 
 Vec2 direction_map[] = {
@@ -47,7 +48,7 @@ typedef struct Arena {
     ~Arena(void) {munmap(data, size());}
     size_t size(void) const {return width*height;}
     long index(const Vec2& v) const {return v.x + v.y * width;}
-    char at(Vec2& v) const {return data[index(v)];}
+    char at(Vec2 v) const {return data[index(v)];}
     bool in_bounds(const Vec2& v) const {return v.x >= 0 && v.x < width && v.y >= 0 && v.y < height;}
 } Arena;
 
@@ -134,6 +135,8 @@ void Pipe::parse(const Arena& arena) {
     }
 }
 
+static std::set<Vec2> area;
+
 int main(void) {
     Arena arena = Arena("./input");
 
@@ -153,6 +156,23 @@ int main(void) {
     }
 
     Pipe start = Pipe(char_map[std::make_pair(sd[0], sd[1])], start_pos);
+    visited.insert(start.position);
     start.parse(arena);
-    std::cout << "Part 1: " << visited.size() / 2 + 1 << '\n';
+    std::cout << "Part 1: " << visited.size() / 2 << '\n';
+
+    Pipe *current = &start;
+    Pipe *next = current->next;
+
+    // https://en.wikipedia.org/wiki/Shoelace_formula#Shoelace_formula
+    long sum = 0;
+    while(next) {
+        sum += current->position.det(next->position);
+        current = next;
+        next = next->next;
+    }
+
+    sum += current->position.det(start.position);
+
+    // somehow this worked ...
+    std::cout << "Part 2: " << std::abs(sum / 2) - visited.size() / 2 + 1 << '\n';
 }
