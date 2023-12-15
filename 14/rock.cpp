@@ -74,15 +74,13 @@ Arena::Arena(const std::string& path) {
     this->height = height;
 }
 
-Vec2 pos_from_dir(const Arena& ar, long v, Direction d) {
-    std::map<Direction, Vec2> loop_map = {
+inline Vec2 pos_from_dir(const Arena& ar, long v, Direction d) {
+    return (std::map<Direction, Vec2>){
         {DIR_UP, {v, 0}},
         {DIR_LEFT, {0, v}},
         {DIR_DOWN, {v, ar.height - 1}},
         {DIR_RIGHT, {ar.width - 2, v}},
-    };
-
-    return loop_map[d];
+    }[d];
 }
 
 void tilt(Arena& ar, Direction dir) {
@@ -118,12 +116,10 @@ long load(const Arena &arena) {
 std::string sha256sum(const char *string) {
     EVP_MD_CTX *mdCtx = EVP_MD_CTX_new();
     unsigned char mdVal[EVP_MAX_MD_SIZE];
-    unsigned int mdLen;
 
     EVP_DigestInit_ex(mdCtx, EVP_sha256(), OPENSSL_ENGINE);
     EVP_DigestUpdate(mdCtx, string, strlen((const char *)string));
-
-    EVP_DigestFinal_ex(mdCtx, mdVal, &mdLen);
+    EVP_DigestFinal_ex(mdCtx, mdVal, NULL);
     EVP_MD_CTX_free(mdCtx);
 
     return std::string((char*)mdVal);
@@ -156,7 +152,6 @@ int main(void) {
                 tilt(arena, (Direction)d);
             }
         }
-
         break;
     }
 
