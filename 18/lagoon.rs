@@ -1,6 +1,5 @@
 use std::fs::read_to_string;
 
-#[derive(Debug)]
 enum Direction {
     Up,
     Right,
@@ -8,15 +7,12 @@ enum Direction {
     Left,
 }
 
-#[derive(Debug)]
 struct Digs {
     dir: Direction,
-    mag: i64,
+    run: i64,
     col: String,
 }
 
-// Our old friend appears again
-// https://en.wikipedia.org/wiki/Shoelace_formula#Shoelace_formula
 impl From<&str> for Digs {
     fn from(s: &str) -> Self {
         let d = s.trim().split_whitespace().collect::<Vec<_>>();
@@ -38,88 +34,69 @@ impl From<&str> for Digs {
 
         Digs {
             dir,
-            mag,
+            run: mag,
             col: col.to_string(),
         }
     }
 }
 
-fn main() {
-    let data = read_to_string("./input").unwrap();
-
+fn area(digs: &Vec<Digs>) -> i64 {
     let mut start = (0, 0);
-    let mut holes: Vec<(i64, i64)> = Vec::from([start]);
+    let mut holes: Vec<(i64, i64)> = Vec::new();
     holes.push(start);
-
-    let digs: Vec<Digs> = data.lines().map(|l| Digs::from(l)).collect::<Vec<_>>();
 
     for d in digs.iter() {
         let dig = match d.dir {
-            Direction::Up => (start.0, start.1 - d.mag),
-            Direction::Right => (start.0 + d.mag, start.1),
-            Direction::Down => (start.0, start.1 + d.mag),
-            Direction::Left => (start.0 - d.mag, start.1),
+            Direction::Up => (start.0, start.1 - d.run),
+            Direction::Right => (start.0 + d.run, start.1),
+            Direction::Down => (start.0, start.1 + d.run),
+            Direction::Left => (start.0 - d.run, start.1),
         };
 
         start = dig;
         holes.push(start);
     }
 
-    println!(
-        "Part 1: {:?}",
-        1 + (holes
-            .windows(2)
-            .map(|h| h[0].0 * h[1].1 - h[1].0 * h[0].1)
-            .sum::<i64>()
-            .abs()
-            + digs.iter().map(|d| d.mag).sum::<i64>())
-            / 2
-    );
+    // Our old friend appears again
+    // https://en.wikipedia.org/wiki/Shoelace_formula#Shoelace_formula
 
-    let newd = digs.iter().map(|d| {
-        let mag = i64::from_str_radix(
-            &d.col
-                .chars()
-                .take(d.col.len() - 1)
-                .collect::<String>(),
-            16
-        ).unwrap();
+    1 + (holes
+        .windows(2)
+        .map(|h| h[0].0 * h[1].1 - h[1].0 * h[0].1)
+        .sum::<i64>()
+        .abs()
+        + digs.iter().map(|d| d.run).sum::<i64>())
+        / 2
+}
 
-        let dir = match d.col.chars().last().unwrap() {
-            '0' => Direction::Right,
-            '1' => Direction::Down,
-            '2' => Direction::Left,
-            '3' => Direction::Up,
-            _ => unreachable!()
-        };
+fn main() {
+    let data = read_to_string("./input").unwrap();
+    let digs: Vec<Digs> = data.lines().map(|l| Digs::from(l)).collect::<Vec<_>>();
 
-        Digs {dir, mag, col: String::new()}
-    }).collect::<Vec<_>>();
+    println!("Part 1: {:?}", area(&digs));
 
-    let mut start = (0, 0);
-    let mut holes: Vec<(i64, i64)> = Vec::from([start]);
-    holes.push(start);
+    let newd = digs
+        .iter()
+        .map(|d| {
+            let mag =
+                i64::from_str_radix(&d.col.chars().take(d.col.len() - 1).collect::<String>(), 16)
+                    .unwrap();
 
-    for d in newd.iter() {
-        let dig = match d.dir {
-            Direction::Up => (start.0, start.1 - d.mag),
-            Direction::Right => (start.0 + d.mag, start.1),
-            Direction::Down => (start.0, start.1 + d.mag),
-            Direction::Left => (start.0 - d.mag, start.1),
-        };
+            let dir = match d.col.chars().last().unwrap() {
+                '0' => Direction::Right,
+                '1' => Direction::Down,
+                '2' => Direction::Left,
+                '3' => Direction::Up,
+                _ => unreachable!(),
+            };
 
-        start = dig;
-        holes.push(start);
-    }
+            Digs {
+                dir,
+                run: mag,
+                col: String::new(),
+            }
+        })
+        .collect::<Vec<_>>();
 
-    println!(
-        "Part 2: {:?}",
-        1 + (holes
-            .windows(2)
-            .map(|h| h[0].0 * h[1].1 - h[1].0 * h[0].1)
-            .sum::<i64>()
-            .abs()
-            + newd.iter().map(|d| d.mag).sum::<i64>())
-            / 2
-    );
+    println!("Part 2: {:?}", area(&newd));
 }
